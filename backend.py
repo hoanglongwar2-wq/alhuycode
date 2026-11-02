@@ -123,7 +123,7 @@ def chat():
             return jsonify({"error": "Gemini API key không hợp lệ hoặc chưa được cấp quyền."}), 401
         if data.get("googleSearch") is True and ("google_search" in msg or "tool" in msg):
             return jsonify({"error": "Model hoặc tài khoản hiện chưa hỗ trợ Google Search grounding. Hãy tắt nút Tìm web hoặc đổi model."}), 502
-        return jsonify({"error": "Gemini gặp lỗi. Kiểm tra log máy chủ hoặc thử lại sau."}), 502
+        return jsonify({"error": "Gemini gặp lỗi: " + str(exc)[:350]}), 502
 
 @app.post("/api/image")
 def image():
@@ -144,9 +144,9 @@ def image():
                 return jsonify({"image": base64.b64encode(blob.data).decode("ascii"),
                                 "mimeType": blob.mime_type or "image/png"})
         return jsonify({"error": "Model không trả về ảnh. Kiểm tra model tạo ảnh và quyền API."}), 502
-    except Exception:
+    except Exception as exc:
         logging.exception("Gemini image generation failed")
-        return jsonify({"error": "Không tạo được ảnh. Model tạo ảnh có thể chưa khả dụng hoặc cần bật thanh toán/hạn mức."}), 502
+        return jsonify({"error": "Không tạo được ảnh: " + str(exc)[:350]}), 502
 
 @app.errorhandler(429)
 def rate_limited(_):
